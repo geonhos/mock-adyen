@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: mock-adyen
+  profiles:
+    # local 프로필 자동 포함 → application-local.yml(자격증명) 자동 로드
+    include: local
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          # 테스트 콘솔: 정적 리소스 캐시 비활성 → 항상 최신 로드
+          no-store: true
+
+server:
+  port: 8080
+  error:
+    # 테스트 콘솔: 400 응답에 검증 실패 사유를 그대로 노출(인스펙터에서 확인 가능)
+    include-message: always
+    include-binding-errors: always
+
+adyen:
+  # 자격증명/머천트 값은 application-local.yml 에서 오버라이드한다. 여기에 직접 쓰지 말 것.
+  # 부팅 시 활성 환경. 런타임 전환은 POST /api/config/environment (콘솔 상단 셀렉터).
+  active-environment: test
+  # Sessions 요청의 returnUrl — 리다이렉트형 결제수단 복귀 URL. 환경 공통.
+  return-url: http://localhost:8080/
+  environments:
+    test:
+      api-key: ""
+      merchant-account: ""
+      base-url: https://checkout-test.adyen.com/v72
+      client-key: ""
+      sdk-base-url: https://checkoutshopper-test.adyen.com
+    live:
+      api-key: ""
+      merchant-account: ""
+      # 운영은 머천트별 프리픽스 호스트 — Customer Area > Developers > API URLs 에서 그대로 복사할 것
+      base-url: ""
+      client-key: ""
+      sdk-base-url: https://checkoutshopper-live.adyen.com
+
+logging:
+  level:
+    com.example.adyen: DEBUG

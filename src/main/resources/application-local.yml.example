@@ -1,0 +1,49 @@
+# =============================================================================
+# Adyen 자격증명 / 머천트 설정
+# -----------------------------------------------------------------------------
+# 사용법:
+#   1) cp application-local.yml.example application-local.yml
+#   2) 아래 값들을 Adyen Customer Area에서 발급받은 값으로 채운다.
+#   3) application-local.yml 은 .gitignore 대상이다. 절대 커밋하지 말 것.
+#
+# 환경 전환은 콘솔 상단 셀렉터(= POST /api/config/environment)로 한다.
+# 앱 재시작은 필요 없고, 브라우저만 리로드된다.
+# =============================================================================
+
+adyen:
+  # 부팅 시 활성 환경 (test | live)
+  active-environment: test
+
+  # Sessions 요청의 returnUrl — 환경 공통
+  return-url: http://localhost:8080/
+
+  environments:
+    test:
+      # Customer Area > Developers > API credentials > [credential] > Server settings > API key
+      api-key: "YOUR_TEST_API_KEY"
+
+      # Customer Area > Account > Merchant accounts
+      merchant-account: "YOUR_TEST_MERCHANT_ACCOUNT"
+
+      base-url: https://checkout-test.adyen.com/v72
+
+      # Customer Area > Developers > API credentials > [credential] > Client settings > Client key
+      # ⚠️ 같은 화면의 Allowed origins 에 http://localhost:8080 을 추가해야 Web Components가 동작한다.
+      client-key: "test_YOUR_CLIENT_KEY"
+
+      # Web Components(SDK) CDN 호스트
+      sdk-base-url: https://checkoutshopper-test.adyen.com
+
+    live:
+      api-key: "YOUR_LIVE_API_KEY"
+      merchant-account: "YOUR_LIVE_MERCHANT_ACCOUNT"
+
+      # ⚠️ test URL의 "test"를 "live"로 바꿔서 만들면 안 된다.
+      # 운영은 머천트별 프리픽스 호스트이고 경로 세그먼트도 다르다.
+      # Customer Area > Developers > API URLs > Checkout API 값을 그대로 복사할 것.
+      #   예) https://{prefix}-{merchant}-checkout-live.adyenpayments.com/checkout/v72
+      base-url: ""
+
+      client-key: "live_YOUR_CLIENT_KEY"
+
+      sdk-base-url: https://checkoutshopper-live.adyen.com

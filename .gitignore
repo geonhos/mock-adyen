@@ -1,0 +1,30 @@
+# Gradle
+.gradle/
+build/
+bin/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.vscode/
+.classpath
+.project
+.settings/
+
+# OS
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Adyen 자격증명 (절대 커밋 금지) — .bak 등 파생 파일까지 포함
+src/main/resources/application-local.yml*
+!src/main/resources/application-local.yml.example
+src/main/resources/application-secret.yml
+*.pem
+.env

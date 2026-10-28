@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>지갑 등록 (Sessions) — mock-adyen</title>
+    <!-- Adyen Web SDK(CSS/JS)는 활성 환경의 CDN에서 shared.js가 동적으로 주입한다.
+         test/live는 CDN 호스트가 다르고, 로드된 SDK는 핫스왑되지 않는다. -->
+    <link rel="preload" href="https://pay.google.com/gp/p/js/pay.js" as="script" />
+    <link rel="stylesheet" href="/css/app.css" />
+</head>
+<body>
+    <div class="topbar">
+        <h1>지갑 등록 (Sessions)</h1>
+        <span class="badge-env" id="env-badge">…</span>
+        <select id="env-select" class="env-select" title="Adyen 환경 전환 — 전환 시 페이지가 리로드됩니다" disabled></select>
+        <div class="spacer"></div>
+        <div class="field">
+            <label for="shopper-ref">shopperReference</label>
+            <input id="shopper-ref" style="width:220px" />
+        </div>
+        <button class="iconbtn" id="theme-toggle" title="다크/라이트">🌗</button>
+    </div>
+
+    <div class="layout">
+      <div>
+        <div class="card">
+            <h2>지갑 등록 (Sessions flow · Apple Pay / Google Pay)</h2>
+            <p class="muted">
+                <code>POST /api/sessions</code> → Adyen <code>/sessions</code> 로 세션 생성 → 지갑 승인 →
+                SDK가 <code>/sessions/{id}/payments</code> 를 직접 호출. amount 0 = 0원 인증, &gt;0 = 결제+저장.
+                storePaymentMethod=true · shopperInteraction=Ecommerce. 상단 shopperReference 필수.
+                완료 후 <code>GET /storedPaymentMethods</code> 를 자동 조회해 새 결제수단을 🆕 로 강조한다.
+            </p>
+            <p class="muted"><b>세션 금액·통화는 생성 시 고정</b>이다. 바꾸면 "세션 생성 후 지갑 마운트"를 다시 눌러야 한다.
+                Apple Pay는 Safari + HTTPS + Adyen 도메인 등록이 필요하고, Google Pay는 Chrome에서 localhost로도 동작한다(TEST).</p>
+            <div class="grid" style="margin:10px 0">
+                <div class="field"><label class="fld">amount (0=0원 인증, minor units)</label><input id="reg-ws-amount" type="number" min="0" value="0" /></div>
+                <div class="field"><label class="fld">currency</label><input id="reg-ws-cur" value="USD" /></div>
+                <div class="field"><label class="fld">recurringProcessingModel</label>
+                    <select id="reg-ws-rpm"><option>CardOnFile</option><option>Subscription</option><option>UnscheduledCardOnFile</option></select></div>
+            </div>
+            <div class="checks"><label><input type="checkbox" id="reg-ws-rpr" checked /> Apple Pay recurringPaymentRequest 포함 (amount 0일 때)</label></div>
+            <button class="primary" id="reg-ws-init">세션 생성 후 지갑 마운트</button>
+            <div id="reg-ws-gpay" style="margin-top:8px"></div>
+            <div id="reg-ws-apay" style="margin-top:8px"></div>
+            <span class="muted" id="reg-ws-status"></span>
+            <p class="verdict" id="reg-ws-verdict"></p>
+            <div id="reg-ws-stored"></div>
+        </div>
+      </div>
+
+      <!-- 인스펙터: 브라우저 ↔ 서버, 그리고 서버 ↔ Adyen 실제 HTTP 교환 -->
+      <aside class="inspector">
+        <div class="card">
+            <h2>요청 / 응답 인스펙터 <button class="ghost sm" id="insp-clear" style="margin-left:auto">비우기</button></h2>
+            <p class="muted" id="insp-empty">액션을 실행하면 요청·응답이 여기 표시됩니다. 항목의 <b>⛶</b>로 크게 볼 수 있어요.</p>
+            <div id="insp-list"></div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- 인스펙터 확대 모달 -->
+    <div class="insp-modal" id="insp-modal" role="dialog" aria-modal="true">
+      <div class="insp-modal-card">
+        <div class="insp-modal-head">
+          <span class="lbl"></span>
+          <span class="meth"></span>
+          <span class="badge neutral">—</span>
+          <span style="flex:1"></span>
+          <button class="ghost sm" data-act="mcopy" title="요청+응답 JSON 복사">⧉ 복사</button>
+          <button class="ghost sm" data-act="close" title="닫기 (ESC)">✕ 닫기</button>
+        </div>
+        <div class="insp-modal-body">
+          <div><h4>요청</h4><pre class="modal-pre" data-pre="req"></pre></div>
+          <div><h4>응답</h4><pre class="modal-pre" data-pre="res"></pre></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="toasts"></div>
+
+    <script src="/js/shared.js"></script>
+    <script src="/js/wallet-sessions.js"></script>
+</body>
+</html>
